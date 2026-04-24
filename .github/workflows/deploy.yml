@@ -1,0 +1,23 @@
+name: Weather Bot
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+jobs:
+  send-weather:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 코드 받기
+        uses: actions/checkout@v3
+      - name: Python 설치
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: 패키지 설치
+        run: pip install python-telegram-bot requests python-dotenv
+      - name: 날씨 전송
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: python bot.py
