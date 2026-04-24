@@ -2,9 +2,14 @@ name: Weather Bot
 
 on:
   schedule:
-    - cron: '0 23 * * *'  # 매일 한국시간 아침 8시 (UTC 23시)
+    - cron: '0 23 * * *'  # 매일 한국시간 아침 8시
     - cron: '0 * * * *'   # 매시간 정각
   workflow_dispatch:
+    inputs:
+      mode:
+        description: '실행 모드 (weather/morning/hourly)'
+        required: false
+        default: 'weather'
 
 jobs:
   send-weather:
@@ -32,10 +37,19 @@ jobs:
         run: python bot.py
 
       - name: 매시간 비 알림
-        if: github.event.schedule == '0 * * * *' || github.event_name == 'workflow_dispatch'
+        if: github.event.schedule == '0 * * * *'
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           MODE: hourly
+        run: python bot.py
+
+      - name: 수동 실행
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          MODE: ${{ github.event.inputs.mode }}
         run: python bot.py
